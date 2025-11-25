@@ -27,5 +27,6 @@
   },
   "homepage": "https://wuxian.xyz",
   "devDependencies": {
-    "vite": "^5.0.0"
+    "vite": "latest"
+  }
 }
