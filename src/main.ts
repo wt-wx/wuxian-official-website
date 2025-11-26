@@ -3,26 +3,25 @@ import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
 
-// 样式导入
+// Styles
 import 'element-plus/dist/index.css'
 import '@/styles/index.scss'
 
-// AOS动画库
+// AOS
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 
 const app = createApp(App)
 
-// 使用插件
 app.use(createPinia())
 app.use(router)
 
-// 初始化AOS动画
+// Initialize AOS
 AOS.init({
   duration: 800,
   easing: 'ease-in-out',
   once: true,
-  mirror: false
+  offset: 50
 })
 
 app.mount('#app')

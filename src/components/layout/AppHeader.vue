@@ -1,71 +1,50 @@
 <template>
   <header class="app-header" :class="{ 'is-scrolled': isScrolled }">
-    <div class="container">
-      <div class="header-content">
-        <!-- Logo -->
-        <div class="logo">
-          <router-link to="/" class="logo-link">
-            <img src="/logo.png" alt="无限科技PMS" class="logo-image" />
-            <span class="logo-text">无限科技PMS</span>
-          </router-link>
-        </div>
+    <div class="container header-inner">
+      <router-link to="/" class="logo">
+        <img src="/logo.svg" alt="网腾无限" class="logo-icon" />
+        <span class="logo-text">网腾无限</span>
+      </router-link>
 
-        <!-- 导航菜单 -->
-        <nav class="nav-menu" :class="{ 'is-open': isMobileMenuOpen }">
-          <ul class="nav-list">
-            <li class="nav-item">
-              <router-link to="/" class="nav-link" @click="closeMobileMenu">首页</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/products" class="nav-link" @click="closeMobileMenu">产品功能</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/solutions" class="nav-link" @click="closeMobileMenu">解决方案</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/technology" class="nav-link" @click="closeMobileMenu">技术架构</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/about" class="nav-link" @click="closeMobileMenu">关于我们</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/contact" class="nav-link" @click="closeMobileMenu">联系我们</router-link>
-            </li>
-          </ul>
-        </nav>
+      <nav class="nav-menu" :class="{ 'is-active': isMobileMenuOpen }">
+        <router-link to="/" class="nav-link" @click="closeMobileMenu">首页</router-link>
+        <router-link to="/product" class="nav-link" @click="closeMobileMenu">产品介绍</router-link>
+        <router-link to="/solutions" class="nav-link" @click="closeMobileMenu">解决方案</router-link>
+        <router-link to="/support" class="nav-link" @click="closeMobileMenu">支持中心</router-link>
+        <router-link to="/contact" class="nav-link" @click="closeMobileMenu">联系我们</router-link>
+      </nav>
 
-        <!-- 移动端菜单按钮 -->
-        <button 
-          class="mobile-menu-btn"
-          @click="toggleMobileMenu"
-          :class="{ 'is-active': isMobileMenuOpen }"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
+      <div class="header-actions">
+        <button class="btn btn-outline btn-sm" @click="showDownloadModal = true">APP 下载</button>
+        <router-link to="/contact" class="btn btn-primary btn-sm">立即咨询</router-link>
+        <button class="mobile-menu-toggle" @click="toggleMobileMenu">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
         </button>
       </div>
     </div>
+
+    <AppDownloadModal v-model="showDownloadModal" />
   </header>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import AppDownloadModal from '@/components/common/AppDownloadModal.vue'
 
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
+const showDownloadModal = ref(false)
 
-// 监听滚动事件
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50
+  isScrolled.value = window.scrollY > 20
 }
 
-// 切换移动端菜单
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
-// 关闭移动端菜单
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
 }
@@ -85,162 +64,129 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: var(--z-index-fixed);
-  background: rgba(255, 255, 255, 0.95);
+  height: 80px;
+  background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
+  z-index: 1000;
   border-bottom: 1px solid transparent;
-  transition: all var(--transition-base);
+  transition: all 0.3s ease;
 
   &.is-scrolled {
-    background: rgba(255, 255, 255, 0.98);
-    border-bottom-color: var(--border-light);
-    box-shadow: var(--shadow-light);
+    background-color: rgba(255, 255, 255, 0.98);
+    border-bottom-color: $color-border;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   }
 }
 
-.header-content {
+.header-inner {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--header-height);
 }
 
 .logo {
-  .logo-link {
-    display: flex;
-    align-items: center;
-    color: var(--text-primary);
-    text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $color-primary-black;
+  letter-spacing: -0.5px;
+  
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    display: block;
   }
-
-  .logo-image {
-    width: 40px;
-    height: 40px;
-    margin-right: var(--spacing-sm);
-  }
-
+  
   .logo-text {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary-color);
+    display: block;
   }
 }
 
 .nav-menu {
-  @include respond-to(lg) {
-    display: block;
-  }
+  display: flex;
+  gap: $spacing-lg;
 
-  // 移动端隐藏
-  @media (max-width: 991px) {
-    position: fixed;
-    top: var(--header-height);
+  @media (max-width: 768px) {
+    position: absolute;
+    top: 80px;
     left: 0;
     right: 0;
-    background: white;
-    border-top: 1px solid var(--border-light);
-    transform: translateY(-100%);
-    opacity: 0;
-    visibility: hidden;
-    transition: all var(--transition-base);
-
-    &.is-open {
-      transform: translateY(0);
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-}
-
-.nav-list {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  @media (max-width: 991px) {
+    background-color: white;
     flex-direction: column;
-    padding: var(--spacing-lg);
-  }
-}
+    padding: $spacing-md;
+    gap: $spacing-md;
+    border-bottom: 1px solid $color-border;
+    transform: translateY(-150%);
+    transition: transform 0.3s ease;
+    z-index: 999;
 
-.nav-item {
-  margin-left: var(--spacing-lg);
-
-  @media (max-width: 991px) {
-    margin: 0;
-    margin-bottom: var(--spacing-md);
+    &.is-active {
+      transform: translateY(0);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
   }
 }
 
 .nav-link {
-  display: block;
-  padding: var(--spacing-sm) 0;
-  color: var(--text-primary);
-  font-weight: var(--font-weight-medium);
-  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $color-secondary-gray;
   position: relative;
-  transition: color var(--transition-fast);
+  padding-bottom: 4px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: $color-brand-blue;
+    transition: width 0.3s ease;
+  }
 
   &:hover {
-    color: var(--primary-color);
+    color: $color-primary-black;
+    
+    &::after {
+      width: 100%;
+    }
   }
 
   &.router-link-active {
-    color: var(--primary-color);
-
+    color: $color-primary-black;
+    
     &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--primary-color);
+      width: 100%;
     }
-  }
-
-  @media (max-width: 991px) {
-    font-size: var(--font-size-lg);
-    padding: var(--spacing-md) 0;
   }
 }
 
-.mobile-menu-btn {
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.mobile-menu-toggle {
   display: none;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 24px;
-  height: 24px;
-  background: transparent;
+  background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
+  flex-direction: column;
+  gap: 4px;
 
-  @media (max-width: 991px) {
+  @media (max-width: 768px) {
     display: flex;
   }
 
-  span {
-    width: 100%;
+  .icon-bar {
+    width: 24px;
     height: 2px;
-    background: var(--text-primary);
-    transition: all var(--transition-fast);
-    transform-origin: center;
-  }
-
-  &.is-active {
-    span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
-    }
-
-    span:nth-child(2) {
-      opacity: 0;
-    }
-
-    span:nth-child(3) {
-      transform: rotate(-45deg) translate(7px, -6px);
-    }
+    background-color: $color-primary-black;
   }
 }
 </style>

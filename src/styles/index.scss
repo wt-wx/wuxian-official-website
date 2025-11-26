@@ -1,228 +1,108 @@
-// 导入变量
-@import './variables.scss';
+@use 'sass:color';
+@use "./variables.scss" as *;
 
-// 重置样式
+// Reset & Base Styles
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-}
-
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  color: var(--text-primary);
-  background-color: var(--bg-primary);
+  font-family: $font-family-base;
+  background-color: $color-bg-white;
+  color: $color-primary-black;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-// 链接样式
 a {
-  color: var(--primary-color);
   text-decoration: none;
-  transition: color var(--transition-fast);
-  
+  color: inherit;
+  transition: color 0.3s ease;
+
   &:hover {
-    color: var(--primary-dark);
+    color: $color-brand-blue;
   }
 }
 
-// 图片样式
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+ul,
+ol {
+  list-style: none;
 }
 
-// 按钮基础样式
+// Container Utility
+.container {
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 $spacing-md;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 0 $spacing-sm;
+  }
+}
+
+// Typography Utilities
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: $spacing-md;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: $spacing-xl;
+
+  h2 {
+    font-size: 2.5rem;
+    color: $color-primary-black;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    font-size: 1.125rem;
+    color: $color-secondary-gray;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+// Button Utilities
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border: none;
-  border-radius: var(--border-radius-base);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px; // Minimalist slightly rounded
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  // 主要按钮
-  &--primary {
-    background: var(--primary-color);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+
+  &.btn-primary {
+    background-color: $color-brand-blue;
     color: white;
-    
-    &:hover:not(:disabled) {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-dark);
+
+    &:hover {
+      background-color: color.scale($color-brand-blue, $lightness: -10%);
     }
   }
-  
-  // 次要按钮
-  &--secondary {
-    background: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-    
-    &:hover:not(:disabled) {
-      background: var(--primary-color);
+
+  &.btn-outline {
+    background-color: transparent;
+    border-color: $color-primary-black;
+    color: $color-primary-black;
+
+    &:hover {
+      background-color: $color-primary-black;
       color: white;
     }
   }
-  
-  // 大尺寸按钮
-  &--large {
-    padding: var(--spacing-md) var(--spacing-xl);
-    font-size: var(--font-size-lg);
-  }
-  
-  // 小尺寸按钮
-  &--small {
-    padding: var(--spacing-xs) var(--spacing-md);
-    font-size: var(--font-size-sm);
-  }
-}
-
-// 容器样式
-.container {
-  @include container();
-}
-
-.container-fluid {
-  width: 100%;
-  padding: 0 var(--spacing-md);
-  
-  @include respond-to(lg) {
-    padding: 0 var(--spacing-lg);
-  }
-}
-
-// 网格系统
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 calc(var(--spacing-md) / -2);
-}
-
-.col {
-  flex: 1;
-  padding: 0 calc(var(--spacing-md) / 2);
-}
-
-// 响应式列
-@for $i from 1 through 12 {
-  .col-#{$i} {
-    flex: 0 0 percentage($i / 12);
-    max-width: percentage($i / 12);
-    padding: 0 calc(var(--spacing-md) / 2);
-  }
-}
-
-// 文本样式
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-muted { color: var(--text-placeholder); }
-
-.font-light { font-weight: var(--font-weight-light); }
-.font-normal { font-weight: var(--font-weight-normal); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
-
-// 间距工具类
-.m-0 { margin: 0; }
-.mt-0 { margin-top: 0; }
-.mb-0 { margin-bottom: 0; }
-.ml-0 { margin-left: 0; }
-.mr-0 { margin-right: 0; }
-
-.p-0 { padding: 0; }
-.pt-0 { padding-top: 0; }
-.pb-0 { padding-bottom: 0; }
-.pl-0 { padding-left: 0; }
-.pr-0 { padding-right: 0; }
-
-// 显示/隐藏工具类
-.d-none { display: none; }
-.d-block { display: block; }
-.d-inline { display: inline; }
-.d-inline-block { display: inline-block; }
-.d-flex { display: flex; }
-
-// Flex工具类
-.justify-content-center { justify-content: center; }
-.justify-content-between { justify-content: space-between; }
-.justify-content-around { justify-content: space-around; }
-.align-items-center { align-items: center; }
-.align-items-start { align-items: flex-start; }
-.align-items-end { align-items: flex-end; }
-
-// 阴影工具类
-.shadow-light { box-shadow: var(--shadow-light); }
-.shadow-base { box-shadow: var(--shadow-base); }
-.shadow-dark { box-shadow: var(--shadow-dark); }
-
-// 圆角工具类
-.rounded-sm { border-radius: var(--border-radius-small); }
-.rounded { border-radius: var(--border-radius-base); }
-.rounded-lg { border-radius: var(--border-radius-large); }
-
-// 动画类
-.fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.slide-up {
-  animation: slideUp 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// 响应式工具类
-@include respond-to(md) {
-  .d-md-none { display: none; }
-  .d-md-block { display: block; }
-  .d-md-flex { display: flex; }
-}
-
-@include respond-to(lg) {
-  .d-lg-none { display: none; }
-  .d-lg-block { display: block; }
-  .d-lg-flex { display: flex; }
 }

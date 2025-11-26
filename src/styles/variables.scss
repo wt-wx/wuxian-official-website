@@ -1,158 +1,23 @@
-// 颜色变量
-:root {
-  // 主色调
-  --primary-color: #409eff;
-  --primary-light: #79bbff;
-  --primary-dark: #337ecc;
-  
-  // 辅助色
-  --success-color: #67c23a;
-  --warning-color: #e6a23c;
-  --danger-color: #f56c6c;
-  --info-color: #909399;
-  
-  // 文字颜色
-  --text-primary: #303133;
-  --text-regular: #606266;
-  --text-secondary: #909399;
-  --text-placeholder: #c0c4cc;
-  
-  // 背景色
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f7fa;
-  --bg-dark: #1a1a1a;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
-  // 边框色
-  --border-light: #ebeef5;
-  --border-base: #dcdfe6;
-  --border-dark: #c0c4cc;
-  
-  // 阴影
-  --shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  --shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-  --shadow-dark: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
-  
-  // 圆角
-  --border-radius-small: 4px;
-  --border-radius-base: 8px;
-  --border-radius-large: 12px;
-  
-  // 间距
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-xxl: 48px;
-  
-  // 字体大小
-  --font-size-xs: 12px;
-  --font-size-sm: 14px;
-  --font-size-base: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 20px;
-  --font-size-xxl: 24px;
-  --font-size-title: 32px;
-  --font-size-hero: 48px;
-  
-  // 行高
-  --line-height-base: 1.5;
-  --line-height-tight: 1.25;
-  --line-height-loose: 1.75;
-  
-  // 字重
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  
-  // 过渡动画
-  --transition-fast: 0.2s ease;
-  --transition-base: 0.3s ease;
-  --transition-slow: 0.5s ease;
-  
-  // 容器宽度
-  --container-sm: 576px;
-  --container-md: 768px;
-  --container-lg: 992px;
-  --container-xl: 1200px;
-  --container-xxl: 1400px;
-  
-  // 导航栏高度
-  --header-height: 80px;
-  
-  // Z-index层级
-  --z-index-dropdown: 1000;
-  --z-index-sticky: 1020;
-  --z-index-fixed: 1030;
-  --z-index-modal-backdrop: 1040;
-  --z-index-modal: 1050;
-  --z-index-popover: 1060;
-  --z-index-tooltip: 1070;
-}
+// Colors - Minimalism Palette
+$color-primary-black: #0F172A;
+$color-secondary-gray: #64748B;
+$color-bg-white: #FFFFFF;
+$color-bg-surface: #F8FAFC;
+$color-brand-blue: #2563EB;
+$color-success: #10B981;
+$color-error: #EF4444;
+$color-border: #E2E8F0;
 
-// 响应式断点
-$breakpoints: (
-  xs: 0,
-  sm: 576px,
-  md: 768px,
-  lg: 992px,
-  xl: 1200px,
-  xxl: 1400px
-);
+// Typography
+$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-// 媒体查询混合器
-@mixin respond-to($breakpoint) {
-  @if map-has-key($breakpoints, $breakpoint) {
-    @media (min-width: map-get($breakpoints, $breakpoint)) {
-      @content;
-    }
-  } @else {
-    @warn "Unknown breakpoint: #{$breakpoint}.";
-  }
-}
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 32px;
+$spacing-xl: 64px;
+$spacing-xxl: 128px;
 
-// 容器混合器
-@mixin container($max-width: var(--container-xl)) {
-  width: 100%;
-  max-width: $max-width;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-  
-  @include respond-to(lg) {
-    padding: 0 var(--spacing-lg);
-  }
-}
-
-// 文字省略混合器
-@mixin text-ellipsis($lines: 1) {
-  @if $lines == 1 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  } @else {
-    display: -webkit-box;
-    -webkit-line-clamp: $lines;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
-// 居中混合器
-@mixin center($direction: both) {
-  position: absolute;
-  
-  @if $direction == both {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  } @else if $direction == horizontal {
-    left: 50%;
-    transform: translateX(-50%);
-  } @else if $direction == vertical {
-    top: 50%;
-    transform: translateY(-50%);
-  }
-}
+// Layout
+$container-width: 1200px;

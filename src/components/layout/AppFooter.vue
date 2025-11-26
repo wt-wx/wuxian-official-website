@@ -1,286 +1,157 @@
+<script setup lang="ts">
+import { ChatDotRound, Notebook, VideoPlay, Promotion } from '@element-plus/icons-vue'
+</script>
+
 <template>
   <footer class="app-footer">
     <div class="container">
       <div class="footer-content">
-        <!-- 主要内容区域 -->
-        <div class="footer-main">
-          <div class="row">
-            <!-- 公司信息 -->
-            <div class="col-12 col-md-6 col-lg-3">
-              <div class="footer-section">
-                <div class="footer-logo">
-                  <img src="/logo.png" alt="无限科技PMS" class="logo-image" />
-                  <span class="logo-text">无限科技PMS</span>
-                </div>
-                <p class="footer-desc">
-                  基于多级分销模式的广告流量分发平台管理系统，让广告分发更智能，让收益管理更简单。
-                </p>
-                <div class="social-links">
-                  <a href="#" class="social-link" title="微信">
-                    <el-icon><ChatDotRound /></el-icon>
-                  </a>
-                  <a href="#" class="social-link" title="QQ">
-                    <el-icon><Message /></el-icon>
-                  </a>
-                  <a href="#" class="social-link" title="邮箱">
-                    <el-icon><Message /></el-icon>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <!-- 产品链接 -->
-            <div class="col-12 col-md-6 col-lg-3">
-              <div class="footer-section">
-                <h4 class="footer-title">产品功能</h4>
-                <ul class="footer-links">
-                  <li><router-link to="/products#yuyu-admin">Web管理后台</router-link></li>
-                  <li><router-link to="/products#dudu-acs">Android管理端</router-link></li>
-                  <li><router-link to="/products#tengteng-wallet">钱包应用</router-link></li>
-                  <li><router-link to="/products#luoluo-mm">用户端应用</router-link></li>
-                  <li><router-link to="/products#zhuangzhuang-api">后端服务</router-link></li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- 解决方案 -->
-            <div class="col-12 col-md-6 col-lg-3">
-              <div class="footer-section">
-                <h4 class="footer-title">解决方案</h4>
-                <ul class="footer-links">
-                  <li><router-link to="/solutions#business-model">商业模式</router-link></li>
-                  <li><router-link to="/solutions#distribution">多级分销</router-link></li>
-                  <li><router-link to="/solutions#revenue">收入模式</router-link></li>
-                  <li><router-link to="/solutions#scenarios">应用场景</router-link></li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- 联系信息 -->
-            <div class="col-12 col-md-6 col-lg-3">
-              <div class="footer-section">
-                <h4 class="footer-title">联系我们</h4>
-                <ul class="footer-contacts">
-                  <li>
-                    <el-icon><Location /></el-icon>
-                    <span>中国·深圳</span>
-                  </li>
-                  <li>
-                    <el-icon><Message /></el-icon>
-                    <span>contact@wuxian.tech</span>
-                  </li>
-                  <li>
-                    <el-icon><Phone /></el-icon>
-                    <span>400-888-8888</span>
-                  </li>
-                  <li>
-                    <el-icon><Clock /></el-icon>
-                    <span>周一至周五 9:00-18:00</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+        <div class="footer-brand">
+          <h3 class="footer-logo">网腾无限</h3>
+          <p class="footer-desc">
+            全平台物联网多级分销系统解决方案提供商。<br>
+            连接万物，赋能商业。
+          </p>
+          <div class="social-icons">
+            <el-tooltip content="微信公众号" placement="top">
+              <div class="icon-btn"><el-icon><ChatDotRound /></el-icon></div>
+            </el-tooltip>
+            <el-tooltip content="知乎" placement="top">
+              <div class="icon-btn"><el-icon><Notebook /></el-icon></div>
+            </el-tooltip>
+            <el-tooltip content="抖音" placement="top">
+              <div class="icon-btn"><el-icon><VideoPlay /></el-icon></div>
+            </el-tooltip>
+            <el-tooltip content="Twitter" placement="top">
+              <div class="icon-btn"><el-icon><Promotion /></el-icon></div>
+            </el-tooltip>
           </div>
         </div>
-
-        <!-- 底部版权信息 -->
-        <div class="footer-bottom">
-          <div class="footer-copyright">
-            <p>&copy; {{ currentYear }} 无限科技PMS. 保留所有权利.</p>
-            <p>
-              <a href="#" class="footer-link">隐私政策</a>
-              <span class="separator">|</span>
-              <a href="#" class="footer-link">服务条款</a>
-              <span class="separator">|</span>
-              <a href="#" class="footer-link">法律声明</a>
-            </p>
+        
+        <div class="footer-links">
+          <div class="link-group">
+            <h4>产品介绍</h4>
+            <router-link to="/product">MDM 设备管理</router-link>
+            <router-link to="/product">分销系统</router-link>
+            <router-link to="/product">广告平台</router-link>
           </div>
-          <div class="footer-badges">
-            <span class="badge">生产就绪</span>
-            <span class="badge">94%完成度</span>
-            <span class="badge">企业级</span>
+          <div class="link-group">
+            <h4>解决方案</h4>
+            <router-link to="/solutions">智慧养老</router-link>
+            <router-link to="/solutions">宠物生态</router-link>
+            <router-link to="/solutions">金融科技</router-link>
+          </div>
+          <div class="link-group">
+            <h4>关于我们</h4>
+            <router-link to="/join">加入我们</router-link>
+            <router-link to="/partners">合作伙伴</router-link>
+            <router-link to="/contact">联系我们</router-link>
           </div>
         </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; {{ new Date().getFullYear() }} 网腾无限科技 (北京) 有限公司. All rights reserved.</p>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue'
-import { ChatDotRound, Message, Location, Phone, Clock } from '@element-plus/icons-vue'
-
-const currentYear = computed(() => new Date().getFullYear())
-</script>
-
 <style lang="scss" scoped>
 .app-footer {
-  background: var(--bg-dark);
-  color: #ffffff;
+  background-color: $color-bg-surface;
+  padding: $spacing-xl 0 $spacing-lg;
+  border-top: 1px solid $color-border;
   margin-top: auto;
 }
 
 .footer-content {
-  padding: var(--spacing-xxl) 0 var(--spacing-lg);
-}
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xl;
 
-.footer-section {
-  margin-bottom: var(--spacing-xl);
-
-  @include respond-to(lg) {
-    margin-bottom: 0;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
   }
 }
 
 .footer-logo {
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-
-  .logo-image {
-    width: 32px;
-    height: 32px;
-    margin-right: var(--spacing-sm);
-  }
-
-  .logo-text {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary-color);
-  }
+  font-size: 1.5rem;
+  margin-bottom: $spacing-md;
+  color: $color-primary-black;
 }
 
 .footer-desc {
-  color: #cccccc;
-  line-height: var(--line-height-loose);
-  margin-bottom: var(--spacing-lg);
+  color: $color-secondary-gray;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: $spacing-md;
 }
 
-.footer-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-md);
-  color: #ffffff;
+.social-icons {
+  display: flex;
+  gap: 12px;
+  
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: $color-bg-white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-secondary-gray;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid $color-border;
+
+    &:hover {
+      background: $color-brand-blue;
+      color: white;
+      border-color: $color-brand-blue;
+    }
+  }
 }
 
 .footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
 
-  li {
-    margin-bottom: var(--spacing-sm);
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.link-group {
+  h4 {
+    font-size: 1rem;
+    margin-bottom: $spacing-md;
+    color: $color-primary-black;
   }
 
   a {
-    color: #cccccc;
-    text-decoration: none;
-    transition: color var(--transition-fast);
+    display: block;
+    color: $color-secondary-gray;
+    margin-bottom: $spacing-sm;
+    font-size: 0.875rem;
 
     &:hover {
-      color: var(--primary-color);
+      color: $color-brand-blue;
     }
-  }
-}
-
-.footer-contacts {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  li {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-    color: #cccccc;
-
-    .el-icon {
-      margin-right: var(--spacing-sm);
-      color: var(--primary-color);
-    }
-  }
-}
-
-.social-links {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  color: #cccccc;
-  text-decoration: none;
-  transition: all var(--transition-fast);
-
-  &:hover {
-    background: var(--primary-color);
-    color: #ffffff;
-    transform: translateY(-2px);
-  }
-
-  .el-icon {
-    font-size: 18px;
   }
 }
 
 .footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-
-  @media (max-width: 767px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-.footer-copyright {
-  color: #999999;
-  font-size: var(--font-size-sm);
-
+  text-align: center;
+  padding-top: $spacing-lg;
+  border-top: 1px solid $color-border;
+  
   p {
-    margin: 0;
-    margin-bottom: var(--spacing-xs);
+    color: $color-secondary-gray;
+    font-size: 0.75rem;
   }
-
-  .footer-link {
-    color: #cccccc;
-    text-decoration: none;
-    transition: color var(--transition-fast);
-
-    &:hover {
-      color: var(--primary-color);
-    }
-  }
-
-  .separator {
-    margin: 0 var(--spacing-sm);
-    color: #666666;
-  }
-}
-
-.footer-badges {
-  display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: wrap;
-}
-
-.badge {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--primary-color);
-  color: #ffffff;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-small);
 }
 </style>
