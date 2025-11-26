@@ -91,9 +91,6 @@ VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-### 管理后台密码
-默认密码可在 `src/views/Admin.vue` 中配置。
-
 ## 🌍 全球化与部署
 
 项目包含 `worker-enhanced.js`，用于 Cloudflare Workers 部署，实现：
