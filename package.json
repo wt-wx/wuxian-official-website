@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
+    "build:worker": "echo 'Worker only, skipping static build'",
     "preview": "vite preview"
   },
   "dependencies": {
