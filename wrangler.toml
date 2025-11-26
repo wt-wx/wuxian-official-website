@@ -1,0 +1,11 @@
+name = "wuxian-official-website"
+main = "worker-enhanced.js"
+compatibility_date = "2025-11-26"
+
+# 绑定自定义域名 (可选，如果已经在 Cloudflare 后台绑定了可以省略)
+# routes = [
+#   { pattern = "www.wuxian.xyz", custom_domain = true }
+# ]
+
+[observability]
+enabled = true
