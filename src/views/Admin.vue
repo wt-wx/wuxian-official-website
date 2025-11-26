@@ -174,6 +174,12 @@ const logout = () => {
 const fetchInquiries = async () => {
   loading.value = true
   try {
+    if (!supabase) {
+      ElMessage.warning('Supabase 未配置 (Mock模式)，无法获取真实数据')
+      inquiries.value = []
+      return
+    }
+
     const { data, error } = await supabase
       .from('inquiries')
       .select('*')
@@ -251,7 +257,7 @@ const getTypeLabel = (type: string) => {
 }
 
 // 获取类型颜色
-const getTypeColor = (type: string) => {
+const getTypeColor = (type: string): any => {
   const colors: Record<string, string> = {
     'partnership': 'success',
     'product': 'primary',
