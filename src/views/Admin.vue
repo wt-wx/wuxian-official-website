@@ -186,7 +186,7 @@
                     <div class="msg-bubble">
                       {{ msg.content }}
                     </div>
-                    <div class="msg-time">{{ formatTime(msg.created_at) }}</div>
+                    <div class="msg-time">{{ formatTime(msg.created_at || '') }}</div>
                   </div>
                 </div>
 
@@ -256,6 +256,11 @@ const handleLogin = async () => {
     return
   }
 
+  if (!supabase) {
+    ElMessage.error('数据库连接未初始化')
+    return
+  }
+
   loading.value = true
   try {
     const { error } = await supabase.auth.signInWithPassword({
@@ -278,6 +283,7 @@ const handleLogin = async () => {
 
 // 退出
 const logout = async () => {
+  if (!supabase) return
   try {
     await supabase.auth.signOut()
     isAuthenticated.value = false
@@ -342,12 +348,13 @@ const chatAreaRef = ref<HTMLElement | null>(null)
 // 复用 composable，但这里主要用于单个会话的操作
 const { 
   messages: currentMessages, 
-  initSession: loadChatSession, 
+  loadConversation,
   sendMessage 
 } = useCustomerService()
 
 // 获取会话列表
 const fetchConversations = async () => {
+  if (!supabase) return
   try {
     const { data, error } = await supabase
       .from('customer_conversations')
@@ -365,9 +372,7 @@ const fetchConversations = async () => {
 const selectConversation = async (conv: any) => {
   currentConversation.value = conv
   // 加载该会话的消息
-  // 注意：useCustomerService 需要稍微改造以支持传入 ID，或者我们直接在这里调用 loadChatSession
-  // 之前的 useCustomerService 设计是支持 initialConversationId 的
-  await loadChatSession(conv.id)
+  await loadConversation(conv.id)
   scrollToBottom()
 }
 
@@ -399,6 +404,7 @@ watch(() => currentMessages.value.length, scrollToBottom)
 
 // 初始化
 onMounted(async () => {
+  if (!supabase) return
   // 检查是否已登录
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {

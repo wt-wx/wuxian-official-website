@@ -44,7 +44,7 @@ export function useCustomerService(initialConversationId?: number) {
         loading.value = true
         try {
             // 1. 查找现有会话
-            const { data: existing, error: findError } = await supabase
+            const { data: existing } = await supabase
                 .from('customer_conversations')
                 .select('*')
                 .eq('visitor_id', visitorId)
@@ -201,6 +201,7 @@ export function useCustomerService(initialConversationId?: number) {
         conversation,
         loading,
         initSession,
+        loadConversation,
         sendMessage,
         visitorId
     }
