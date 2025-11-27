@@ -57,6 +57,10 @@ const router = createRouter({
       name: 'admin',
       component: () => import('@/views/Admin.vue'),
       meta: { title: '管理后台 - 网腾无限科技' }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })

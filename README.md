@@ -53,7 +53,7 @@
   - 零额外成本 (使用 Supabase 免费额度)
 
 ### 6. 管理后台 (Admin)
-- **访问地址**: `/dashboard-mgmt-2024` (安全路径，避免暴力攻击)
+- **访问地址**: `/dashboard-panel` (管理入口)
 - **认证方式**: Supabase Authentication (Email + Password)
 - **功能模块**: 
   - **商务咨询**: 查看、搜索、导出商务咨询数据

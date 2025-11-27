@@ -404,7 +404,10 @@ watch(() => currentMessages.value.length, scrollToBottom)
 
 // 初始化
 onMounted(async () => {
-  if (!supabase) return
+  if (!supabase) {
+    console.warn('Supabase not configured. Admin features will be limited.')
+    return
+  }
   // 检查是否已登录
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {
