@@ -13,16 +13,16 @@ import { ChatDotRound, Notebook, VideoPlay, Promotion } from '@element-plus/icon
             连接万物，赋能商业。
           </p>
           <div class="social-icons">
-            <el-tooltip content="微信公众号" placement="top">
+            <el-tooltip content="微信:staff9525" placement="top">
               <div class="icon-btn"><el-icon><ChatDotRound /></el-icon></div>
             </el-tooltip>
-            <el-tooltip content="知乎" placement="top">
+            <el-tooltip content="知乎:nexble" placement="top">
               <div class="icon-btn"><el-icon><Notebook /></el-icon></div>
             </el-tooltip>
-            <el-tooltip content="抖音" placement="top">
+            <el-tooltip content="抖音:hanzoWT" placement="top">
               <div class="icon-btn"><el-icon><VideoPlay /></el-icon></div>
             </el-tooltip>
-            <el-tooltip content="Twitter" placement="top">
+            <el-tooltip content="钉钉:i1000100" placement="top">
               <div class="icon-btn"><el-icon><Promotion /></el-icon></div>
             </el-tooltip>
           </div>
@@ -31,14 +31,14 @@ import { ChatDotRound, Notebook, VideoPlay, Promotion } from '@element-plus/icon
         <div class="footer-links">
           <div class="link-group">
             <h4>产品介绍</h4>
-            <router-link to="/product">MDM 设备管理</router-link>
+            <router-link to="/product">MDM Agent</router-link>
             <router-link to="/product">分销系统</router-link>
             <router-link to="/product">广告平台</router-link>
           </div>
           <div class="link-group">
             <h4>解决方案</h4>
-            <router-link to="/solutions">智慧养老</router-link>
-            <router-link to="/solutions">宠物生态</router-link>
+            <router-link to="/solutions">航天国防</router-link>
+            <router-link to="/solutions">教育医疗</router-link>
             <router-link to="/solutions">金融科技</router-link>
           </div>
           <div class="link-group">
@@ -51,7 +51,7 @@ import { ChatDotRound, Notebook, VideoPlay, Promotion } from '@element-plus/icon
       </div>
       
       <div class="footer-bottom">
-        <p>&copy; {{ new Date().getFullYear() }} 网腾无限科技 (北京) 有限公司. All rights reserved.</p>
+        <p>&copy; {{ new Date().getFullYear() }} 网腾无限科技. All rights reserved.</p>
       </div>
     </div>
   </footer>

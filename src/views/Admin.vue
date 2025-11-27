@@ -7,6 +7,14 @@
           <h2>商务咨询管理后台</h2>
         </template>
         <el-form @submit.prevent="handleLogin">
+          <el-form-item label="管理员邮箱">
+            <el-input 
+              v-model="email" 
+              type="email" 
+              placeholder="请输入管理员邮箱"
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
           <el-form-item label="访问密码">
             <el-input 
               v-model="password" 
@@ -25,112 +33,201 @@
     <!-- 数据管理界面 -->
     <div v-else class="admin-container">
       <div class="admin-header">
-        <h1>商务咨询列表</h1>
+        <h1>管理后台</h1>
         <div class="header-actions">
-          <el-button @click="refreshData" :loading="loading">
-            <el-icon><Refresh /></el-icon> 刷新
-          </el-button>
-          <el-button @click="exportToCSV">
-            <el-icon><Download /></el-icon> 导出 CSV
-          </el-button>
           <el-button @click="logout" type="danger">
             <el-icon><SwitchButton /></el-icon> 退出
           </el-button>
         </div>
       </div>
 
-      <!-- 统计卡片 -->
-      <div class="stats-cards">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-label">总咨询数</div>
-            <div class="stat-value">{{ inquiries.length }}</div>
+      <el-tabs v-model="activeTab" class="admin-tabs">
+        <!-- Tab 1: 商务咨询 (原有功能) -->
+        <el-tab-pane label="商务咨询" name="inquiries">
+          <div class="tab-actions">
+            <el-button @click="refreshData" :loading="loading">
+              <el-icon><Refresh /></el-icon> 刷新
+            </el-button>
+            <el-button @click="exportToCSV">
+              <el-icon><Download /></el-icon> 导出 CSV
+            </el-button>
           </div>
-        </el-card>
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-label">今日新增</div>
-            <div class="stat-value">{{ todayCount }}</div>
-          </div>
-        </el-card>
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-label">本周新增</div>
-            <div class="stat-value">{{ weekCount }}</div>
-          </div>
-        </el-card>
-      </div>
 
-      <!-- 数据表格 -->
-      <el-card class="table-card">
-        <el-table 
-          :data="filteredInquiries" 
-          v-loading="loading"
-          stripe
-          border
-          style="width: 100%"
-        >
-          <el-table-column type="expand">
-            <template #default="{ row }">
-              <div class="expand-content">
-                <p><strong>详细需求：</strong></p>
-                <p class="message-content">{{ row.message }}</p>
-                <p><strong>提交时间：</strong> {{ formatDate(row.created_at) }}</p>
+          <!-- 统计卡片 -->
+          <div class="stats-cards">
+            <el-card class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">总咨询数</div>
+                <div class="stat-value">{{ inquiries.length }}</div>
               </div>
-            </template>
-          </el-table-column>
-          
-          <el-table-column prop="name" label="姓名" width="120" />
-          <el-table-column prop="company" label="公司" width="200" />
-          <el-table-column prop="mobile" label="手机号" width="130" />
-          <el-table-column prop="email" label="邮箱" width="200" />
-          
-          <el-table-column prop="type" label="咨询类型" width="150">
-            <template #default="{ row }">
-              <el-tag :type="getTypeColor(row.type)">
-                {{ getTypeLabel(row.type) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          
-          <el-table-column prop="created_at" label="提交时间" width="180">
-            <template #default="{ row }">
-              {{ formatDate(row.created_at) }}
-            </template>
-          </el-table-column>
-          
-          <el-table-column label="操作" width="150" fixed="right">
-            <template #default="{ row }">
-              <el-button 
-                link 
-                type="primary" 
-                @click="copyContact(row)"
+            </el-card>
+            <el-card class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">今日新增</div>
+                <div class="stat-value">{{ todayCount }}</div>
+              </div>
+            </el-card>
+            <el-card class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">本周新增</div>
+                <div class="stat-value">{{ weekCount }}</div>
+              </div>
+            </el-card>
+          </div>
+
+          <!-- 数据表格 -->
+          <el-card class="table-card">
+            <el-table 
+              :data="filteredInquiries" 
+              v-loading="loading"
+              stripe
+              border
+              style="width: 100%"
+            >
+              <el-table-column type="expand">
+                <template #default="{ row }">
+                  <div class="expand-content">
+                    <p><strong>详细需求：</strong></p>
+                    <p class="message-content">{{ row.message }}</p>
+                    <p><strong>提交时间：</strong> {{ formatDate(row.created_at) }}</p>
+                  </div>
+                </template>
+              </el-table-column>
+              
+              <el-table-column prop="name" label="姓名" width="120" />
+              <el-table-column prop="company" label="公司" width="200" />
+              <el-table-column prop="mobile" label="手机号" width="130" />
+              <el-table-column prop="email" label="邮箱" width="200" />
+              
+              <el-table-column prop="type" label="咨询类型" width="150">
+                <template #default="{ row }">
+                  <el-tag :type="getTypeColor(row.type)">
+                    {{ getTypeLabel(row.type) }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              
+              <el-table-column prop="created_at" label="提交时间" width="180">
+                <template #default="{ row }">
+                  {{ formatDate(row.created_at) }}
+                </template>
+              </el-table-column>
+              
+              <el-table-column label="操作" width="150" fixed="right">
+                <template #default="{ row }">
+                  <el-button 
+                    link 
+                    type="primary" 
+                    @click="copyContact(row)"
+                  >
+                    复制联系方式
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </el-tab-pane>
+
+        <!-- Tab 2: 在线客服 (新功能) -->
+        <el-tab-pane label="在线客服" name="chat">
+          <div class="chat-dashboard">
+            <!-- 左侧：会话列表 -->
+            <div class="conversation-list">
+              <div class="list-header">
+                <h3>会话列表</h3>
+                <el-button circle size="small" @click="fetchConversations">
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
+              </div>
+              
+              <div v-if="conversations.length === 0" class="empty-list">
+                暂无会话
+              </div>
+
+              <div 
+                v-for="conv in conversations" 
+                :key="conv.id"
+                class="conversation-item"
+                :class="{ active: currentConversation?.id === conv.id }"
+                @click="selectConversation(conv)"
               >
-                复制联系方式
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+                <div class="conv-avatar">
+                  <el-avatar :size="40">{{ conv.visitor_name?.slice(-2) || '访客' }}</el-avatar>
+                  <div class="status-dot" :class="conv.status"></div>
+                </div>
+                <div class="conv-info">
+                  <div class="conv-name">{{ conv.visitor_name || '匿名访客' }}</div>
+                  <div class="conv-time">{{ formatTime(conv.last_message_at) }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右侧：聊天窗口 -->
+            <div class="chat-panel">
+              <div v-if="!currentConversation" class="no-selection">
+                <el-empty description="请选择一个会话开始聊天" />
+              </div>
+              
+              <div v-else class="active-chat">
+                <div class="chat-header-bar">
+                  <span>{{ currentConversation.visitor_name }}</span>
+                  <el-tag size="small" :type="getStatusType(currentConversation.status)">
+                    {{ currentConversation.status }}
+                  </el-tag>
+                </div>
+
+                <div class="chat-messages-area" ref="chatAreaRef">
+                  <div 
+                    v-for="(msg, index) in currentMessages" 
+                    :key="msg.id || index"
+                    class="admin-message-item"
+                    :class="{ 'is-me': msg.sender_type === 'agent' }"
+                  >
+                    <div class="msg-bubble">
+                      {{ msg.content }}
+                    </div>
+                    <div class="msg-time">{{ formatTime(msg.created_at) }}</div>
+                  </div>
+                </div>
+
+                <div class="chat-input-area">
+                  <el-input
+                    v-model="replyText"
+                    type="textarea"
+                    :rows="3"
+                    placeholder="输入回复..."
+                    @keyup.enter.ctrl="sendReply"
+                  />
+                  <div class="input-tools">
+                    <span class="tip">Ctrl + Enter 发送</span>
+                    <el-button type="primary" @click="sendReply" :loading="sending">发送</el-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, Download, SwitchButton } from '@element-plus/icons-vue'
 import { supabase } from '@/utils/supabase'
-
-// 简单的密码认证（生产环境建议使用更安全的方式）
-const ADMIN_PASSWORD = 'hello-wtwx' // 请修改为您的密码
+import { useCustomerService } from '@/composables/useCustomerService'
 
 const isAuthenticated = ref(false)
+const email = ref('')
 const password = ref('')
 const loading = ref(false)
+const activeTab = ref('inquiries')
+
+// --- 商务咨询逻辑 ---
 const inquiries = ref<any[]>([])
 
-// 统计数据
 const todayCount = computed(() => {
   const today = new Date().toDateString()
   return inquiries.value.filter(item => 
@@ -153,33 +250,49 @@ const filteredInquiries = computed(() => {
 })
 
 // 登录
-const handleLogin = () => {
-  if (password.value === ADMIN_PASSWORD) {
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    ElMessage.warning('请输入邮箱和密码')
+    return
+  }
+
+  loading.value = true
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value
+    })
+
+    if (error) throw error
+
     isAuthenticated.value = true
-    sessionStorage.setItem('admin_auth', 'true')
+    ElMessage.success('登录成功')
     fetchInquiries()
-  } else {
-    ElMessage.error('密码错误')
+    fetchConversations()
+  } catch (error: any) {
+    ElMessage.error('登录失败: ' + error.message)
+  } finally {
+    loading.value = false
   }
 }
 
 // 退出
-const logout = () => {
-  isAuthenticated.value = false
-  sessionStorage.removeItem('admin_auth')
-  password.value = ''
+const logout = async () => {
+  try {
+    await supabase.auth.signOut()
+    isAuthenticated.value = false
+    email.value = ''
+    password.value = ''
+    ElMessage.success('已退出登录')
+  } catch (error: any) {
+    ElMessage.error('退出失败: ' + error.message)
+  }
 }
 
-// 获取数据
 const fetchInquiries = async () => {
   loading.value = true
   try {
-    if (!supabase) {
-      ElMessage.warning('Supabase 未配置 (Mock模式)，无法获取真实数据')
-      inquiries.value = []
-      return
-    }
-
+    if (!supabase) return
     const { data, error } = await supabase
       .from('inquiries')
       .select('*')
@@ -188,93 +301,159 @@ const fetchInquiries = async () => {
     if (error) throw error
     inquiries.value = data || []
   } catch (error: any) {
-    ElMessage.error('获取数据失败: ' + error.message)
+    ElMessage.error('获取咨询失败: ' + error.message)
   } finally {
     loading.value = false
   }
 }
 
-// 刷新数据
 const refreshData = () => {
   fetchInquiries()
   ElMessage.success('数据已刷新')
 }
 
-// 导出 CSV
 const exportToCSV = () => {
   const headers = ['姓名', '公司', '手机号', '邮箱', '咨询类型', '详细需求', '提交时间']
   const rows = inquiries.value.map(item => [
-    item.name,
-    item.company,
-    item.mobile,
-    item.email || '',
-    getTypeLabel(item.type),
-    item.message,
-    formatDate(item.created_at)
+    item.name, item.company, item.mobile, item.email || '',
+    getTypeLabel(item.type), item.message, formatDate(item.created_at)
   ])
-
-  const csv = [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-  ].join('\n')
-
+  const csv = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n')
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
   link.download = `inquiries_${new Date().toISOString().slice(0, 10)}.csv`
   link.click()
-  
-  ElMessage.success('导出成功')
 }
 
-// 复制联系方式
 const copyContact = (row: any) => {
   const text = `姓名: ${row.name}\n公司: ${row.company}\n手机: ${row.mobile}\n邮箱: ${row.email || '未填写'}`
   navigator.clipboard.writeText(text)
-  ElMessage.success('已复制到剪贴板')
+  ElMessage.success('已复制')
 }
 
-// 格式化日期
+// --- 在线客服逻辑 ---
+const conversations = ref<any[]>([])
+const currentConversation = ref<any>(null)
+const replyText = ref('')
+const sending = ref(false)
+const chatAreaRef = ref<HTMLElement | null>(null)
+
+// 复用 composable，但这里主要用于单个会话的操作
+const { 
+  messages: currentMessages, 
+  initSession: loadChatSession, 
+  sendMessage 
+} = useCustomerService()
+
+// 获取会话列表
+const fetchConversations = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('customer_conversations')
+      .select('*')
+      .order('last_message_at', { ascending: false })
+    
+    if (error) throw error
+    conversations.value = data || []
+  } catch (error) {
+    console.error('Error fetching conversations:', error)
+  }
+}
+
+// 选择会话
+const selectConversation = async (conv: any) => {
+  currentConversation.value = conv
+  // 加载该会话的消息
+  // 注意：useCustomerService 需要稍微改造以支持传入 ID，或者我们直接在这里调用 loadChatSession
+  // 之前的 useCustomerService 设计是支持 initialConversationId 的
+  await loadChatSession(conv.id)
+  scrollToBottom()
+}
+
+// 发送回复
+const sendReply = async () => {
+  if (!replyText.value.trim() || !currentConversation.value) return
+  
+  sending.value = true
+  try {
+    await sendMessage(replyText.value, 'agent')
+    replyText.value = ''
+    scrollToBottom()
+    // 更新列表中的时间
+    fetchConversations() 
+  } finally {
+    sending.value = false
+  }
+}
+
+const scrollToBottom = async () => {
+  await nextTick()
+  if (chatAreaRef.value) {
+    chatAreaRef.value.scrollTop = chatAreaRef.value.scrollHeight
+  }
+}
+
+// 监听新消息滚动
+watch(() => currentMessages.value.length, scrollToBottom)
+
+// 初始化
+onMounted(async () => {
+  // 检查是否已登录
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    isAuthenticated.value = true
+    fetchInquiries()
+    fetchConversations()
+    
+    // 订阅新会话
+    supabase
+      .channel('admin-conversations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_conversations' }, () => {
+        fetchConversations()
+      })
+      .subscribe()
+  }
+})
+
+// --- 通用工具 ---
 const formatDate = (dateStr: string) => {
+  if (!dateStr) return ''
   return new Date(dateStr).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
   })
 }
 
-// 获取类型标签
+const formatTime = (dateStr: string) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  const now = new Date()
+  if (date.toDateString() === now.toDateString()) {
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  }
+  return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+}
+
 const getTypeLabel = (type: string) => {
   const labels: Record<string, string> = {
-    'partnership': '商务合作 (分销/代理)',
-    'product': '产品咨询 (MDM/PMS)',
-    'solution': '行业解决方案',
-    'other': '其他'
+    'partnership': '商务合作', 'product': '产品咨询',
+    'solution': '解决方案', 'other': '其他'
   }
   return labels[type] || type
 }
 
-// 获取类型颜色
 const getTypeColor = (type: string): any => {
   const colors: Record<string, string> = {
-    'partnership': 'success',
-    'product': 'primary',
-    'solution': 'warning',
-    'other': 'info'
+    'partnership': 'success', 'product': 'primary',
+    'solution': 'warning', 'other': 'info'
   }
   return colors[type] || 'info'
 }
 
-// 初始化
-onMounted(() => {
-  // 检查是否已登录
-  if (sessionStorage.getItem('admin_auth') === 'true') {
-    isAuthenticated.value = true
-    fetchInquiries()
-  }
-})
+const getStatusType = (status: string) => {
+  return status === 'active' ? 'success' : (status === 'waiting' ? 'warning' : 'info')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -294,12 +473,7 @@ onMounted(() => {
 .login-card {
   width: 100%;
   max-width: 400px;
-
-  h2 {
-    margin: 0;
-    text-align: center;
-    color: $color-primary-black;
-  }
+  h2 { text-align: center; margin: 0; }
 }
 
 .admin-container {
@@ -313,16 +487,13 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  h1 { margin: 0; }
+}
 
-  h1 {
-    margin: 0;
-    color: $color-primary-black;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 10px;
-  }
+.tab-actions {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
 }
 
 .stats-cards {
@@ -330,46 +501,158 @@ onMounted(() => {
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .stat-card {
-  .stat-content {
-    text-align: center;
-  }
-
-  .stat-label {
-    font-size: 14px;
-    color: $color-secondary-gray;
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: $color-brand-blue;
-  }
-}
-
-.table-card {
-  margin-bottom: 20px;
+  .stat-content { text-align: center; }
+  .stat-label { font-size: 14px; color: #909399; margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 700; color: #409eff; }
 }
 
 .expand-content {
   padding: 20px;
   background-color: #f9fafb;
+  .message-content { white-space: pre-wrap; line-height: 1.6; }
+}
 
-  p {
-    margin: 10px 0;
+/* 客服面板样式 */
+.chat-dashboard {
+  display: flex;
+  height: 600px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+  overflow: hidden;
+}
+
+.conversation-list {
+  width: 300px;
+  border-right: 1px solid #ebeef5;
+  display: flex;
+  flex-direction: column;
+  background: #fcfcfc;
+
+  .list-header {
+    padding: 15px;
+    border-bottom: 1px solid #ebeef5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h3 { margin: 0; font-size: 16px; }
   }
 
-  .message-content {
-    white-space: pre-wrap;
-    line-height: 1.6;
-    color: $color-primary-black;
+  .empty-list {
+    padding: 20px;
+    text-align: center;
+    color: #909399;
+  }
+
+  .conversation-item {
+    padding: 15px;
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f0f2f5;
+
+    &:hover { background: #f5f7fa; }
+    &.active { background: #ecf5ff; }
+
+    .conv-avatar {
+      position: relative;
+      .status-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        &.active { background: #67c23a; }
+        &.waiting { background: #e6a23c; }
+        &.closed { background: #909399; }
+      }
+    }
+
+    .conv-info {
+      flex: 1;
+      overflow: hidden;
+      .conv-name { font-weight: 500; margin-bottom: 4px; }
+      .conv-time { font-size: 12px; color: #909399; }
+    }
+  }
+}
+
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  .no-selection {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .active-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .chat-header-bar {
+    padding: 15px;
+    border-bottom: 1px solid #ebeef5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+  }
+
+  .chat-messages-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f5f7fa;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .admin-message-item {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+    
+    &.is-me {
+      align-self: flex-end;
+      align-items: flex-end;
+      .msg-bubble { background: #409eff; color: #fff; border-radius: 12px 12px 0 12px; }
+    }
+
+    &:not(.is-me) {
+      align-self: flex-start;
+      .msg-bubble { background: #fff; border-radius: 12px 12px 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    }
+
+    .msg-bubble { padding: 10px 15px; line-height: 1.5; }
+    .msg-time { font-size: 12px; color: #c0c4cc; margin-top: 4px; }
+  }
+
+  .chat-input-area {
+    padding: 15px;
+    border-top: 1px solid #ebeef5;
+    background: #fff;
+
+    .input-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      .tip { font-size: 12px; color: #909399; }
+    }
   }
 }
 </style>

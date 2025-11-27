@@ -14,7 +14,7 @@
         <div class="contact-info" data-aos="fade-right">
           <div class="info-block">
             <h3>公司总部</h3>
-            <p>北京市朝阳区科技园区创新大厦 A 座 2088 室</p>
+            <p>北京市朝阳区博瑞大厦 A 座 2088 室</p>
           </div>
 
           <div class="info-block">
@@ -30,9 +30,9 @@
           <div class="info-block">
             <h3>联系邮箱</h3>
             <ul class="email-list">
-              <li><span>技术支持:</span> support@wuxian.xyz</li>
-              <li><span>商务合作:</span> contact@wuxian.xyz</li>
-              <li><span>媒体联络:</span> press@wuxian.xyz</li>
+              <li><span>技术支持:</span> support@wangteng.tech</li>
+              <li><span>商务合作:</span> contact@wangteng.tech</li>
+              <li><span>媒体联络:</span> press@wangteng.tech</li>
             </ul>
           </div>
 

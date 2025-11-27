@@ -53,7 +53,7 @@ const router = createRouter({
       meta: { title: '联系我们 - 网腾无限科技' }
     },
     {
-      path: '/admin',
+      path: '/wtwx-panel',
       name: 'admin',
       component: () => import('@/views/Admin.vue'),
       meta: { title: '管理后台 - 网腾无限科技' }
