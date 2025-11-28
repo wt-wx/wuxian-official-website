@@ -177,3 +177,28 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 **预期效果**: 二级页面加载时间提升 **98%**
 
 ## 📄 目录结构
+```
+wuxian-official-website/
+├── public/              # 静态资源 (Logo, Favicon, World Map)
+├── src/
+│   ├── assets/          # 编译资源
+│   ├── components/      # 公共组件
+│   │   ├── layout/      # Header, Footer
+│   │   └── customer-service/  # 客服组件 (ChatBubble, ChatWindow) 🆕
+│   ├── composables/     # 组合式函数 (useCustomerService) 🆕
+│   ├── router/          # 路由配置
+│   ├── styles/          # 全局样式 (SCSS)
+│   ├── utils/           # 工具函数 (Supabase, visitorId) 🆕
+│   ├── views/           # 页面视图 (Home, Solutions, Product, Admin...)
+│   ├── App.vue          # 根组件
+│   └── main.ts          # 入口文件
+├── supabase_schema.sql  # 商务咨询表结构
+├── supabase_migrations_20251127_customer_service.sql  # 客服系统表结构 🆕
+├── supabase_migrations_20251127_rate_limit.sql  # 防刷限制策略 🆕
+├── worker-enhanced.js   # Cloudflare Worker 配置
+├── index.html           # HTML 入口
+└── vite.config.ts       # Vite 配置
+```
+
+---
+© 2025 无限科技 (Wuxian PMS). All Rights Reserved.
