@@ -59,6 +59,16 @@ const GEO_ROUTING = {
 };
 
 // === 工具函数 ===
+
+// 清理响应头 (避免 Content-Encoding 问题导致白屏)
+function cleanHeaders(headers) {
+    const newHeaders = new Headers(headers);
+    newHeaders.delete('content-encoding');
+    newHeaders.delete('content-length');
+    newHeaders.delete('transfer-encoding');
+    return newHeaders;
+}
+
 async function fetchWithTimeout(url, options = {}) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -135,11 +145,17 @@ async function sequentialFallback(request, preferredBackend = null) {
         });
 
         if (res && res.ok) {
-            const response = new Response(res.body, res);
-            response.headers.set('X-Backend-Used', backend.name);
-            response.headers.set('X-Backend-Latency', latency + 'ms');
-            response.headers.set('X-Fallback-Mode', 'true');
-            return response;
+            // 关键修复: 清理 headers,避免 gzip 解码错误
+            const headers = cleanHeaders(res.headers);
+            headers.set('X-Backend-Used', backend.name);
+            headers.set('X-Backend-Latency', latency + 'ms');
+            headers.set('X-Fallback-Mode', 'true');
+
+            return new Response(res.body, {
+                status: res.status,
+                statusText: res.statusText,
+                headers: headers
+            });
         }
     }
 
@@ -173,9 +189,15 @@ async function handleWithCache(request) {
 
     let response = await cache.match(cacheKey);
     if (response) {
-        response = new Response(response.body, response);
-        response.headers.set('X-Cache-Status', 'HIT');
-        return response;
+        // 缓存命中,也需要清理 headers (虽然缓存的通常已经是清理过的,但为了保险)
+        const headers = cleanHeaders(response.headers);
+        headers.set('X-Cache-Status', 'HIT');
+
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: headers
+        });
     }
 
     // 缓存未命中，获取新响应
@@ -183,18 +205,27 @@ async function handleWithCache(request) {
     response = await sequentialFallback(request, preferredBackend);
 
     if (response.ok) {
-        const clonedResponse = new Response(response.body, response);
+        // response 已经是 cleanHeaders 过的了(来自 sequentialFallback)
+        // 但我们需要克隆它并添加缓存头
+        const headers = new Headers(response.headers);
 
         // 根据类型设置不同的缓存时间
         if (isStatic) {
-            clonedResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+            headers.set('Cache-Control', 'public, max-age=31536000, immutable');
         } else if (isHTML) {
-            clonedResponse.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');  // HTML 缓存 5 分钟
+            headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');  // HTML 缓存 5 分钟
         }
 
-        clonedResponse.headers.set('X-Cache-Status', 'MISS');
+        headers.set('X-Cache-Status', 'MISS');
+
+        const clonedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: headers
+        });
 
         // 异步写入缓存，不阻塞响应
+        // 注意: cache.put 需要 clone 响应,因为 body 只能读取一次
         await cache.put(cacheKey, clonedResponse.clone());
         return clonedResponse;
     }
@@ -228,23 +259,11 @@ export default {
             const selected = preferredBackend || weightedSelect(BACKENDS);
             const target = selected.url + url.pathname + url.search;
 
-            const { res, latency } = await fetchWithTimeout(target, {
-                method: request.method,
-                headers: request.headers,
-                body: request.method === "GET" ? undefined : request.body,
-                redirect: "follow"
-            });
-
-            if (res && res.ok) {
-                const response = new Response(res.body, res);
-                response.headers.set('X-Backend-Used', selected.name);
-                response.headers.set('X-Backend-Latency', latency + 'ms');
-                response.headers.set('X-Geo-Routing', preferredBackend ? 'true' : 'false');
-                return response;
-            }
-
-            // 回退机制
-            return await sequentialFallback(request, selected);
+            // 如果是静态资源或 HTML,走缓存逻辑
+            // 注意: 这里有一个逻辑分支。如果 USE_RACE=false, 我们通常希望走 handleWithCache
+            // 因为 handleWithCache 内部会调用 sequentialFallback
+            // 所以这里直接调用 handleWithCache 即可
+            return await handleWithCache(request);
 
         } catch (e) {
             return new Response(JSON.stringify({
