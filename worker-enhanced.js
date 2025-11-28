@@ -60,12 +60,24 @@ const GEO_ROUTING = {
 
 // === 工具函数 ===
 
+// 移除条件请求头 (强制后端返回 200,确保能获取内容进行缓存)
+function removeConditionalHeaders(headers) {
+    const newHeaders = new Headers(headers);
+    newHeaders.delete('if-modified-since');
+    newHeaders.delete('if-none-match');
+    newHeaders.delete('if-unmodified-since');
+    newHeaders.delete('if-match');
+    return newHeaders;
+}
+
 // 清理响应头 (避免 Content-Encoding 问题导致白屏)
 function cleanHeaders(headers) {
     const newHeaders = new Headers(headers);
     newHeaders.delete('content-encoding');
     newHeaders.delete('content-length');
     newHeaders.delete('transfer-encoding');
+    newHeaders.delete('connection');
+    newHeaders.delete('keep-alive');
     return newHeaders;
 }
 
@@ -81,7 +93,7 @@ async function fetchWithTimeout(url, options = {}) {
         return { res, latency };
     } catch (e) {
         clearTimeout(timeout);
-        return { res: null, latency: Date.now() - startTime };
+        return { res: null, latency: Date.now() - startTime, error: e.message };
     }
 }
 
@@ -129,20 +141,37 @@ function getPreferredBackend(request) {
     return BACKENDS.find(b => b.name === preferred);
 }
 
-async function sequentialFallback(request, preferredBackend = null) {
+async function sequentialFallback(request, preferredBackend = null, debug = false) {
     // 优先尝试地理位置推荐的后端,然后按权重排序
     const orderedBackends = preferredBackend
         ? [preferredBackend, ...BACKENDS.filter(b => b !== preferredBackend).sort((a, b) => b.weight - a.weight)]
         : BACKENDS.sort((a, b) => b.weight - a.weight);
 
+    const debugLogs = [];
+
+    // 准备请求头: 移除条件头,确保获取完整响应
+    const reqHeaders = removeConditionalHeaders(request.headers);
+
     for (const backend of orderedBackends) {
         const target = backend.url + request.url.replace(/^https?:\/\/[^/]+/, "");
-        const { res, latency } = await fetchWithTimeout(target, {
+
+        if (debug) debugLogs.push(`Trying ${backend.name} (${target})...`);
+
+        const { res, latency, error } = await fetchWithTimeout(target, {
             method: request.method,
-            headers: request.headers,
+            headers: reqHeaders, // 使用处理过的 headers
             body: request.method === "GET" ? undefined : request.body,
             redirect: "follow"
         });
+
+        if (debug) {
+            if (res) {
+                debugLogs.push(`  Result: Status ${res.status}, OK=${res.ok}, Latency=${latency}ms`);
+                debugLogs.push(`  Headers: ${JSON.stringify(Object.fromEntries(res.headers))}`);
+            } else {
+                debugLogs.push(`  Result: Failed (Error: ${error}), Latency=${latency}ms`);
+            }
+        }
 
         if (res && res.ok) {
             // 关键修复: 清理 headers,避免 gzip 解码错误
@@ -150,6 +179,17 @@ async function sequentialFallback(request, preferredBackend = null) {
             headers.set('X-Backend-Used', backend.name);
             headers.set('X-Backend-Latency', latency + 'ms');
             headers.set('X-Fallback-Mode', 'true');
+
+            if (debug) {
+                return new Response(JSON.stringify({
+                    status: "success",
+                    backend: backend.name,
+                    latency: latency,
+                    logs: debugLogs,
+                    targetUrl: target,
+                    responseHeaders: Object.fromEntries(headers)
+                }, null, 2), { headers: { 'content-type': 'application/json' } });
+            }
 
             return new Response(res.body, {
                 status: res.status,
@@ -159,17 +199,33 @@ async function sequentialFallback(request, preferredBackend = null) {
         }
     }
 
+    if (debug) {
+        return new Response(JSON.stringify({
+            status: "failed",
+            message: "All backends failed",
+            logs: debugLogs
+        }, null, 2), { status: 502, headers: { 'content-type': 'application/json' } });
+    }
+
     return new Response("All backends failed", { status: 502 });
 }
 
 async function handleWithCache(request) {
+    const url = new URL(request.url);
+    const debug = url.searchParams.has('debug');
+
+    // 调试模式: 跳过缓存,直接请求并返回诊断信息
+    if (debug) {
+        const preferredBackend = getPreferredBackend(request);
+        return await sequentialFallback(request, preferredBackend, true);
+    }
+
     // 缓存 GET 请求的静态资源和 HTML 页面
     if (request.method !== 'GET') {
         const preferredBackend = getPreferredBackend(request);
         return await sequentialFallback(request, preferredBackend);
     }
 
-    const url = new URL(request.url);
     const pathname = url.pathname;
 
     // 扩展缓存规则:静态资源 + HTML 页面
@@ -189,7 +245,7 @@ async function handleWithCache(request) {
 
     let response = await cache.match(cacheKey);
     if (response) {
-        // 缓存命中,也需要清理 headers (虽然缓存的通常已经是清理过的,但为了保险)
+        // 缓存命中,也需要清理 headers
         const headers = cleanHeaders(response.headers);
         headers.set('X-Cache-Status', 'HIT');
 
@@ -205,8 +261,6 @@ async function handleWithCache(request) {
     response = await sequentialFallback(request, preferredBackend);
 
     if (response.ok) {
-        // response 已经是 cleanHeaders 过的了(来自 sequentialFallback)
-        // 但我们需要克隆它并添加缓存头
         const headers = new Headers(response.headers);
 
         // 根据类型设置不同的缓存时间
@@ -225,7 +279,6 @@ async function handleWithCache(request) {
         });
 
         // 异步写入缓存，不阻塞响应
-        // 注意: cache.put 需要 clone 响应,因为 body 只能读取一次
         await cache.put(cacheKey, clonedResponse.clone());
         return clonedResponse;
     }
@@ -249,20 +302,12 @@ export default {
                 });
             }
 
-            // 智能竞速策略
+            // 智能竞速策略 (已禁用)
             if (USE_RACE) {
                 return await handleWithCache(request);
             }
 
-            // 地理位置智能路由 + 权重策略
-            const preferredBackend = getPreferredBackend(request);
-            const selected = preferredBackend || weightedSelect(BACKENDS);
-            const target = selected.url + url.pathname + url.search;
-
-            // 如果是静态资源或 HTML,走缓存逻辑
-            // 注意: 这里有一个逻辑分支。如果 USE_RACE=false, 我们通常希望走 handleWithCache
-            // 因为 handleWithCache 内部会调用 sequentialFallback
-            // 所以这里直接调用 handleWithCache 即可
+            // 统一入口
             return await handleWithCache(request);
 
         } catch (e) {
