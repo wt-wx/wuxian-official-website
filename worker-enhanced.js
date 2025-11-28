@@ -3,46 +3,59 @@ const BACKENDS = [
     {
         name: "vercel",
         url: "https://vercel.wuxian.xyz",
-        weight: 2,
-        region: "US"
-    },
-    {
-        name: "render",
-        url: "https://render.wuxian.xyz",
-        weight: 2,
-        region: "EU"
-    },
-    {
-        name: "qcloud",
-        url: "https://qcloud.wuxian.xyz",
-        weight: 2,  // 国内用户优先
+        weight: 3,  // 最快 (87.1ms),适中权重避免过度依赖
         region: "CN"
     },
     {
         name: "netlify",
         url: "https://netlify.wuxian.xyz",
-        weight: 3,
+        weight: 2,  // 良好 (208ms),地理分布广
+        region: "GLOBAL"
+    },
+    {
+        name: "render",
+        url: "https://render.wuxian.xyz",
+        weight: 2,  // 很快 (173.2ms),优质备选
+        region: "EU"
+    },
+    {
+        name: "qcloud",
+        url: "https://qcloud.wuxian.xyz",
+        weight: 1,  // 最慢 (264ms),仅移动线路有优势
         region: "GLOBAL"
     }
 ];
 
-const TIMEOUT_MS = 1800;  // 超时切换到下一个源
+const TIMEOUT_MS = 3000;  // 超时切换到下一个源 (从1.8s增加到3s)
 const HEALTHCHECK_PATH = "/"; // 健康检查路径
-const USE_RACE = true; // 开启"谁先返回用谁"（智能最快源）
+const USE_RACE = false; // 禁用竞速模式,节省带宽 (从 true 改为 false)
 const USE_GEO_ROUTING = true; // 开启地理位置智能路由
 const CACHE_STATIC = true; // 缓存静态资源
+const CACHE_HTML = true; // 缓存 HTML 页面 (新增)
 
-// 地理位置路由映射
+// 地理位置路由映射 (基于 91 节点测速数据优化)
 const GEO_ROUTING = {
-    'CN': 'qcloud',      // 中国大陆 → 腾讯云
-    'HK': 'qcloud',      // 香港 → 腾讯云
-    'TW': 'qcloud',      // 台湾 → 腾讯云
+    // 亚太地区 - 全部 Vercel (测试证明最快)
+    'CN': 'vercel',      // 中国大陆 → Vercel (87.1ms,电信/联通/多线最快)
+    'HK': 'vercel',      // 香港 → Vercel
+    'TW': 'vercel',      // 台湾 → Vercel
+    'SG': 'vercel',      // 新加坡 → Vercel
+    'JP': 'vercel',      // 日本 → Vercel
+    'KR': 'vercel',      // 韩国 → Vercel
+
+    // 美洲地区 - Vercel
     'US': 'vercel',      // 美国 → Vercel
     'CA': 'vercel',      // 加拿大 → Vercel
+    'BR': 'vercel',      // 巴西 → Vercel
+
+    // 欧洲地区 - Netlify (地理位置更近)
     'GB': 'netlify',     // 英国 → Netlify
     'DE': 'netlify',     // 德国 → Netlify
     'FR': 'netlify',     // 法国 → Netlify
-    'default': 'render'  // 其他 → Render
+    'NL': 'netlify',     // 荷兰 → Netlify
+
+    // 默认 - Vercel (全球最优)
+    'default': 'vercel'
 };
 
 // === 工具函数 ===
@@ -107,10 +120,10 @@ function getPreferredBackend(request) {
 }
 
 async function sequentialFallback(request, preferredBackend = null) {
-    // 优先尝试地理位置推荐的后端
+    // 优先尝试地理位置推荐的后端,然后按权重排序
     const orderedBackends = preferredBackend
-        ? [preferredBackend, ...BACKENDS.filter(b => b !== preferredBackend)]
-        : BACKENDS;
+        ? [preferredBackend, ...BACKENDS.filter(b => b !== preferredBackend).sort((a, b) => b.weight - a.weight)]
+        : BACKENDS.sort((a, b) => b.weight - a.weight);
 
     for (const backend of orderedBackends) {
         const target = backend.url + request.url.replace(/^https?:\/\/[^/]+/, "");
@@ -134,16 +147,24 @@ async function sequentialFallback(request, preferredBackend = null) {
 }
 
 async function handleWithCache(request) {
-    // 只缓存 GET 请求的静态资源
-    if (request.method !== 'GET' || !CACHE_STATIC) {
-        return USE_RACE ? await raceBackends(request) : await sequentialFallback(request);
+    // 缓存 GET 请求的静态资源和 HTML 页面
+    if (request.method !== 'GET') {
+        const preferredBackend = getPreferredBackend(request);
+        return await sequentialFallback(request, preferredBackend);
     }
 
     const url = new URL(request.url);
-    const isStatic = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp)$/.test(url.pathname);
+    const pathname = url.pathname;
 
-    if (!isStatic) {
-        return USE_RACE ? await raceBackends(request) : await sequentialFallback(request);
+    // 扩展缓存规则:静态资源 + HTML 页面
+    const isStatic = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp)$/.test(pathname);
+    const isHTML = CACHE_HTML && (pathname === '/' || pathname.endsWith('.html') || !pathname.includes('.'));
+    const isAPI = pathname.startsWith('/api/');
+
+    // API 请求不缓存,直接返回
+    if (isAPI || (!isStatic && !isHTML)) {
+        const preferredBackend = getPreferredBackend(request);
+        return await sequentialFallback(request, preferredBackend);
     }
 
     // 使用 Cloudflare Cache API
@@ -158,11 +179,19 @@ async function handleWithCache(request) {
     }
 
     // 缓存未命中，获取新响应
-    response = USE_RACE ? await raceBackends(request) : await sequentialFallback(request);
+    const preferredBackend = getPreferredBackend(request);
+    response = await sequentialFallback(request, preferredBackend);
 
     if (response.ok) {
         const clonedResponse = new Response(response.body, response);
-        clonedResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+
+        // 根据类型设置不同的缓存时间
+        if (isStatic) {
+            clonedResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        } else if (isHTML) {
+            clonedResponse.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');  // HTML 缓存 5 分钟
+        }
+
         clonedResponse.headers.set('X-Cache-Status', 'MISS');
 
         // 异步写入缓存，不阻塞响应

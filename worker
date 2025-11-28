@@ -1,0 +1,117 @@
+// === 配置区 ===
+const BACKENDS = [
+  {
+    name: "vercel",
+    url: "https://vercel.wuxian.xyz",
+    weight: 2  // 权重越高，流量越多
+  },
+  {
+    name: "render",
+    url: "https://render.wuxian.xyz",
+    weight: 2  // 权重越高，流量越多
+  },
+  {
+    name: "qcloud",
+    url: "https://qcloud.wuxian.xyz",
+    weight: 2  // 权重越高，流量越多
+  },
+  {
+    name: "netlify",
+    url: "https://netlify.wuxian.xyz",
+    weight: 3
+  }
+];
+
+const TIMEOUT_MS = 1800;  // 超时切换到下一个源
+const HEALTHCHECK_PATH = "/"; // 健康检查路径
+const USE_RACE = true; // 开启“谁先返回用谁”（智能最快源）
+
+// === 工具函数 ===
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeout);
+    return res;
+  } catch (e) {
+    clearTimeout(timeout);
+    return null;
+  }
+}
+
+async function raceBackends(request) {
+  const fetches = BACKENDS.map(b =>
+    fetchWithTimeout(b.url + request.url.replace(/^https?:\/\/[^/]+/, ""), {
+      method: request.method,
+      headers: request.headers,
+      body: request.method === "GET" ? undefined : request.body,
+      redirect: "follow"
+    }).then(res => ({ backend: b, res }))
+  );
+
+  const winner = await Promise.any(fetches.map(p => p.then(x => {
+    if (x.res && x.res.ok) return x;
+    throw new Error("Bad backend");
+  })));
+
+  return winner.res;
+}
+
+function weightedSelect(backends) {
+  const list = [];
+  for (const b of backends) {
+    for (let i = 0; i < b.weight; i++) {
+      list.push(b);
+    }
+  }
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+async function sequentialFallback(request) {
+  for (const backend of BACKENDS) {
+    const target = backend.url + request.url.replace(/^https?:\/\/[^/]+/, "");
+    const res = await fetchWithTimeout(target, {
+      method: request.method,
+      headers: request.headers,
+      body: request.method === "GET" ? undefined : request.body,
+      redirect: "follow"
+    });
+
+    if (res && res.ok) return res;
+  }
+
+  return new Response("All backends failed", { status: 502 });
+}
+
+// === 主入口 ===
+export default {
+  async fetch(request) {
+    try {
+      // 智能竞速策略
+      if (USE_RACE) {
+        return await raceBackends(request);
+      }
+
+      // 权重策略 + 健康检查
+      const selected = weightedSelect(BACKENDS);
+      const target = selected.url + request.url.replace(/^https?:\/\/[^/]+/, "");
+
+      let res = await fetchWithTimeout(target, {
+        method: request.method,
+        headers: request.headers,
+        body: request.method === "GET" ? undefined : request.body,
+        redirect: "follow"
+      });
+
+      if (res && res.ok) return res;
+
+      // 回退机制
+      return await sequentialFallback(request);
+
+    } catch (e) {
+      return new Response("Worker Error: " + e.message, { status: 500 });
+    }
+  }
+};
